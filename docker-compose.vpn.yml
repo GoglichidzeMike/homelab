@@ -1,0 +1,30 @@
+# VPN mode: qBittorrent's traffic goes through Mullvad (gluetun). Toggle with scripts/vpn.sh.
+# Kill switch: if the VPN is down (e.g. subscription expired), torrents stop instead of using the home IP.
+services:
+  gluetun:
+    image: qmcgaw/gluetun:v3
+    container_name: gluetun
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    ports:
+      - 8090:8090  # qBittorrent web UI
+    environment:
+      - TZ=Asia/Tbilisi
+      - VPN_SERVICE_PROVIDER=mullvad
+      - VPN_TYPE=wireguard
+      - WIREGUARD_PRIVATE_KEY=${MULLVAD_WG_PRIVATE_KEY}
+      - WIREGUARD_ADDRESSES=${MULLVAD_WG_ADDRESS}
+      - SERVER_COUNTRIES=${MULLVAD_COUNTRY:-Netherlands}
+    networks:
+      default:
+        aliases:
+          - qbittorrent  # Radarr/Sonarr/Homarr keep using qbittorrent:8090
+    restart: unless-stopped
+
+  qbittorrent:
+    network_mode: service:gluetun
+    ports: !reset []
+    depends_on:
+      - gluetun

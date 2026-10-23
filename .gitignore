@@ -3,6 +3,8 @@
 !/.gitignore
 !/README.md
 !/docker-compose.yml
+!/docker-compose.vpn.yml
+!/scripts/
 !/.env.example
 !/frigate/
 /frigate/*
