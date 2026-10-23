@@ -76,6 +76,11 @@ cameras:
         - path: rtsp://127.0.0.1:8554/bedroom
           input_args: preset-rtsp-restream
           roles: [detect, record]
+    onvif:  # pan/tilt controls in the Frigate live view
+      host: 192.168.0.106
+      port: 8899
+      user: '{FRIGATE_CAM106_USER}'
+      password: '{FRIGATE_CAM106_PASS}'
     detect:
       enabled: false
 
@@ -85,6 +90,11 @@ cameras:
         - path: rtsp://127.0.0.1:8554/wardrobe
           input_args: preset-rtsp-restream
           roles: [detect, record]
+    onvif:  # pan/tilt controls in the Frigate live view
+      host: 192.168.0.107
+      port: 8899
+      user: '{FRIGATE_CAM107_USER}'
+      password: '{FRIGATE_CAM107_PASS}'
 
   living_room:
     ffmpeg:
@@ -92,6 +102,11 @@ cameras:
         - path: rtsp://127.0.0.1:8554/living_room
           input_args: preset-rtsp-restream
           roles: [detect, record]
+    onvif:  # pan/tilt controls in the Frigate live view
+      host: 192.168.0.110
+      port: 8899
+      user: '{FRIGATE_CAM110_USER}'
+      password: '{FRIGATE_CAM110_PASS}'
 
   kitchen:
     ffmpeg:
