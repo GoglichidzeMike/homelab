@@ -1,0 +1,190 @@
+services:
+  jellyfin:
+    image: jellyfin/jellyfin
+    container_name: jellyfin
+    network_mode: host
+    volumes:
+      - ./jellyfin/config:/config
+      - ./jellyfin/cache:/cache
+      - /mnt/media:/media
+      - /mnt/media:/mnt/media  # same paths as Radarr/Sonarr
+    restart: unless-stopped
+
+  homeassistant:
+    image: ghcr.io/home-assistant/home-assistant:stable
+    container_name: homeassistant
+    network_mode: host
+    privileged: true
+    environment:
+      - TZ=Asia/Tbilisi
+    volumes:
+      - ./homeassistant:/config
+      - /etc/localtime:/etc/localtime:ro
+      - /run/dbus:/run/dbus:ro
+    restart: unless-stopped
+
+  portainer:
+    image: portainer/portainer-ce
+    container_name: portainer
+    ports:
+      - 9443:9443
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./portainer:/data
+    restart: unless-stopped
+
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: cloudflared
+    network_mode: host
+    command: tunnel --no-autoupdate run
+    environment:
+      - TUNNEL_TOKEN=${TUNNEL_TOKEN}
+    restart: unless-stopped
+
+  frigate:
+    image: ghcr.io/blakeblackshear/frigate:stable
+    container_name: frigate
+    shm_size: 256mb
+    devices:
+      - /dev/dri/renderD128:/dev/dri/renderD128  # Intel GPU
+    environment:
+      - TZ=Asia/Tbilisi
+    env_file:
+      - .env
+    ports:
+      - 8971:8971              # web UI (login required)
+      - 127.0.0.1:5000:5000    # internal API for Home Assistant, no login
+      - 127.0.0.1:8554:8554    # RTSP restream for Home Assistant live view
+    volumes:
+      - ./frigate/config:/config
+      - /mnt/media/frigate:/media/frigate
+      - /etc/localtime:/etc/localtime:ro
+      - type: tmpfs
+        target: /tmp/cache
+        tmpfs:
+          size: 1000000000
+    restart: unless-stopped
+
+  mosquitto:
+    image: eclipse-mosquitto:2
+    container_name: mosquitto
+    ports:
+      - 127.0.0.1:1883:1883  # Home Assistant (host network)
+    volumes:
+      - ./mosquitto/config:/mosquitto/config
+      - ./mosquitto/data:/mosquitto/data
+    restart: unless-stopped
+
+  dozzle:
+    image: amir20/dozzle:latest
+    container_name: dozzle
+    ports:
+      - 8888:8080
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./dozzle/data:/data  # users and settings
+    restart: unless-stopped
+
+  # --- Movies & TV: Seerr -> Radarr/Sonarr -> qBittorrent -> /mnt/media -> Jellyfin ---
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    ports:
+      - 8090:8090          # web UI
+      - 6881:6881          # torrent traffic
+      - 6881:6881/udp
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Asia/Tbilisi
+      - WEBUI_PORT=8090
+      - TORRENTING_PORT=6881
+    volumes:
+      - ./qbittorrent:/config
+      - /mnt/media:/mnt/media  # same path as Radarr/Sonarr so imports are hardlinks
+    restart: unless-stopped
+
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:latest
+    container_name: prowlarr
+    ports:
+      - 9696:9696
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Asia/Tbilisi
+    volumes:
+      - ./prowlarr:/config
+    restart: unless-stopped
+
+  radarr:
+    image: lscr.io/linuxserver/radarr:latest
+    container_name: radarr
+    ports:
+      - 7878:7878
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Asia/Tbilisi
+    volumes:
+      - ./radarr:/config
+      - /mnt/media:/mnt/media
+    depends_on:
+      - qbittorrent
+    restart: unless-stopped
+
+  sonarr:
+    image: lscr.io/linuxserver/sonarr:latest
+    container_name: sonarr
+    ports:
+      - 8989:8989
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Asia/Tbilisi
+    volumes:
+      - ./sonarr:/config
+      - /mnt/media:/mnt/media
+    depends_on:
+      - qbittorrent
+    restart: unless-stopped
+
+  seerr:
+    image: ghcr.io/seerr-team/seerr:latest
+    container_name: seerr
+    init: true
+    ports:
+      - 5055:5055
+    environment:
+      - TZ=Asia/Tbilisi
+    volumes:
+      - ./seerr/config:/app/config
+    restart: unless-stopped
+
+  homarr:  # dashboard, configured in the browser
+    image: ghcr.io/homarr-labs/homarr:latest
+    container_name: homarr
+    ports:
+      - 7575:7575
+    environment:
+      - TZ=Asia/Tbilisi
+      - SECRET_ENCRYPTION_KEY=${HOMARR_SECRET_KEY}  # encrypts saved integration secrets
+    volumes:
+      - ./homarr/appdata:/appdata
+      - /var/run/docker.sock:/var/run/docker.sock:ro  # container status
+    restart: unless-stopped
+
+  glances:  # CPU/RAM/disk/temps for the Homarr dashboard (internal only, no port published)
+    image: nicolargo/glances:latest
+    container_name: glances
+    pid: host
+    environment:
+      - TZ=Asia/Tbilisi
+      - GLANCES_OPT=-w --disable-webui
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /etc/os-release:/etc/os-release:ro
+      - /mnt/media:/mnt/media:ro  # so the HDD shows up
+    restart: unless-stopped

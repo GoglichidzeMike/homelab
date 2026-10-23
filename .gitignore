@@ -1,0 +1,16 @@
+# Allowlist: only config that's safe to publish. App data dirs hold API keys, DBs and sessions.
+/*
+!/.gitignore
+!/README.md
+!/docker-compose.yml
+!/.env.example
+!/frigate/
+/frigate/*
+!/frigate/config/
+/frigate/config/*
+!/frigate/config/config.yml
+!/mosquitto/
+/mosquitto/*
+!/mosquitto/config/
+/mosquitto/config/*
+!/mosquitto/config/mosquitto.conf
