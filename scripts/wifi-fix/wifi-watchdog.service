@@ -1,0 +1,6 @@
+[Unit]
+Description=Reconnect Wi-Fi if the router is unreachable
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/wifi-watchdog.sh
