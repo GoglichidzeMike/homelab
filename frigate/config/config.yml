@@ -99,6 +99,11 @@ cameras:
         - path: rtsp://127.0.0.1:8554/kitchen
           input_args: preset-rtsp-restream
           roles: [detect, record]
+    onvif:  # pan/tilt controls in the Frigate live view
+      host: 192.168.0.111
+      port: 8899
+      user: '{FRIGATE_CAM111_USER}'
+      password: '{FRIGATE_CAM111_PASS}'
 version: 0.18-0
 notifications:
   enabled: 'true'
