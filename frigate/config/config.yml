@@ -69,16 +69,14 @@ cameras:
   # connections, and fewer leaves headroom after restarts. Detection runs on
   # a GPU-scaled 640x360 copy.
 
-  # Live view only: no recording, no detection
+  # Motion recording 09:00-21:00 only (toggled by a Home Assistant automation), no object detection
   bedroom:
     ffmpeg:
       inputs:
         - path: rtsp://127.0.0.1:8554/bedroom
           input_args: preset-rtsp-restream
-          roles: [detect]
+          roles: [detect, record]
     detect:
-      enabled: false
-    record:
       enabled: false
 
   wardrobe:

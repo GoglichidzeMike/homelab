@@ -75,4 +75,5 @@ if Mullvad is down, downloads stop rather than leak the home IP. Everything else
 
 - Wi-Fi (rtl8723be) drops from power saving. Fix: `options rtl8723be fwlps=0 ips=0` in
   `/etc/modprobe.d/rtl8723be.conf`, reboot — or use Ethernet.
+- Bedroom camera records motion 09:00–21:00 only, via the HA automation "Bedroom camera: record 09:00-21:00".
 - Plan: move to a Raspberry Pi with a 4 TB NAS HDD (CMR, e.g. WD Red Plus / IronWolf).
