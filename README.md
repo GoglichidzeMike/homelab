@@ -71,11 +71,23 @@ VPN mode adds `docker-compose.vpn.yml` via `COMPOSE_FILE` in `.env`. It has a ki
 if Mullvad is down, downloads stop rather than leak the home IP. Everything else keeps working.
 `MULLVAD_COUNTRY` picks the server country.
 
+## Home Assistant extras
+
+Stored in HA's own data (covered by backups, not tracked in git):
+
+- Custom integrations in `homeassistant/custom_components/`: `frigate`, `xiaomi_home`
+  (official Xiaomi, from github.com/XiaoMi/ha_xiaomi_home — update by replacing the folder, restart HA).
+- Xiaomi Home: cloud region Singapore; 3× S20+ vacuums, humidifier, rice cooker. Most raw vacuum
+  entities are hidden; the useful ones are renamed.
+- Dashboard **Vacuums** (`/robot-vacuums`): one card per vacuum — controls, mode/suction/water,
+  battery, maintenance.
+- Automation "Bedroom camera: record 09:00-21:00".
+
 ## Known issues / todo
 
 - Wi-Fi (rtl8723be) drops from power saving and sometimes loses its DHCP lease.
   `sudo bash scripts/wifi-fix/install.sh && sudo reboot` installs: driver power-save off,
   keep-IP-on-missed-renewal, and a watchdog timer (reconnect → reload driver → reboot after 15 min
   offline). Watchdog log: `journalctl -t wifi-watchdog`. Ethernet makes all of this unnecessary.
-- Bedroom camera records motion 09:00–21:00 only, via the HA automation "Bedroom camera: record 09:00-21:00".
+- Bedroom camera records motion 09:00–21:00 only (see HA extras). All 4 cameras have ONVIF pan/tilt in Frigate.
 - Plan: move to a Raspberry Pi with a 4 TB NAS HDD (CMR, e.g. WD Red Plus / IronWolf).

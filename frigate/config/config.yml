@@ -122,3 +122,12 @@ cameras:
 version: 0.18-0
 notifications:
   enabled: 'true'
+camera_groups:
+  test:
+    order: 1
+    icon: LuAirplay
+    cameras:
+      - bedroom
+      - wardrobe
+      - living_room
+      - kitchen
