@@ -7,7 +7,7 @@ set -uo pipefail
 SRC=/home/mikegogl/homelab
 DST=/mnt/media/backups
 KEEP=14
-APPS="jellyfin homeassistant portainer qbittorrent prowlarr radarr sonarr seerr homarr"
+APPS="jellyfin homeassistant portainer qbittorrent prowlarr radarr sonarr seerr homarr audiobookshelf"
 STAMP=$(date +%F_%H%M)
 
 mkdir -p "$DST"
@@ -20,7 +20,7 @@ trap 'docker start $running >/dev/null' EXIT
 docker run --rm -v "$SRC":/src:ro -v "$DST":/dst alpine:3.20 sh -c "
   tar czf /dst/homelab-$STAMP.tar.gz -C /src \
     --exclude='jellyfin/cache' --exclude='*/logs' --exclude='*/log' --exclude='*.log' \
-    --exclude='*/MediaCover' --exclude='frigate/config/model_cache' --exclude='homarr/appdata/redis' \
+    --exclude='*/MediaCover' --exclude='frigate/config/model_cache' --exclude='homarr/appdata/redis' --exclude='audiobookshelf/metadata/cache' \
     --exclude='docker-compose.yml.bak*' . &&
   chown 1000:1000 /dst/homelab-$STAMP.tar.gz && chmod 600 /dst/homelab-$STAMP.tar.gz"
 status=$?

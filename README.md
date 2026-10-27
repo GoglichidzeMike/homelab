@@ -13,6 +13,7 @@ Tailscale `homelab.tailb183e9.ts.net`). Media + recordings live on the HDD at `/
 | Home Assistant | Smart home | 8123 | https://ha.saxli.app |
 | Frigate | Cameras / NVR | 8971 | https://cam.saxli.app (Frigate login) |
 | Dozzle | Container logs | 8888 | https://logs.saxli.app (Cloudflare Access) |
+| Audiobookshelf | Audiobooks / podcasts (iPhone: ShelfPlayer) | 13378 | https://books.saxli.app (own login) |
 | Radarr / Sonarr | Movie / TV automation | 7878 / 8989 | LAN or Tailscale only |
 | Prowlarr | Torrent indexers | 9696 | LAN or Tailscale only |
 | qBittorrent | Downloads | 8090 | LAN or Tailscale only |
@@ -28,6 +29,13 @@ Seerr request → Radarr/Sonarr → Prowlarr finds a torrent → qBittorrent dow
 `/mnt/media/downloads` → imported (hardlink) to `/mnt/media/movies` or `/mnt/media/tv` →
 Jellyfin library refresh. Torrents are removed after import (no seeding). Quality profile:
 HD-1080p, no remux, size-capped.
+
+## How audiobooks work
+
+Add a torrent/magnet in qBittorrent with category **audiobooks** → it downloads to
+`/mnt/media/downloads/incomplete`, then moves to `/mnt/media/audiobooks` when finished →
+Audiobookshelf picks it up automatically. Or just copy files into `/mnt/media/audiobooks`
+(one folder per book). Podcasts are managed inside Audiobookshelf (`/mnt/media/podcasts`).
 
 ## Remote access
 

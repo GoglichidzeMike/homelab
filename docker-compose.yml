@@ -163,6 +163,21 @@ services:
       - ./seerr/config:/app/config
     restart: unless-stopped
 
+  audiobookshelf:  # audiobooks + podcasts; qBittorrent category "audiobooks" saves into the library
+    image: ghcr.io/advplyr/audiobookshelf:latest
+    container_name: audiobookshelf
+    user: 1000:1000
+    ports:
+      - 13378:80
+    environment:
+      - TZ=Asia/Tbilisi
+    volumes:
+      - ./audiobookshelf/config:/config
+      - ./audiobookshelf/metadata:/metadata
+      - /mnt/media/audiobooks:/audiobooks
+      - /mnt/media/podcasts:/podcasts
+    restart: unless-stopped
+
   homarr:  # dashboard, configured in the browser
     image: ghcr.io/homarr-labs/homarr:latest
     container_name: homarr
