@@ -17,7 +17,7 @@ running=$(docker ps --format '{{.Names}}' | grep -xE "$(echo $APPS | tr ' ' '|')
 docker stop $running >/dev/null
 trap 'docker start $running >/dev/null' EXIT
 
-docker run --rm -v "$SRC":/src:ro -v /mnt/media/paperless/media:/extra/paperless-media:ro -v "$DST":/dst alpine:3.20 sh -c "
+docker run --rm -v "$SRC":/src:ro -v /mnt/media/paperless/media:/extra/paperless-media:ro -v "$DST":/dst debian:12-slim sh -c "
   tar czf /dst/homelab-$STAMP.tar.gz -C /src \
     --exclude='jellyfin/cache' --exclude='*/logs' --exclude='*/log' --exclude='*.log' \
     --exclude='*/MediaCover' --exclude='frigate/config/model_cache' --exclude='homarr/appdata/redis' --exclude='audiobookshelf/metadata/cache' --exclude='paperless/redis' \
@@ -26,7 +26,15 @@ docker run --rm -v "$SRC":/src:ro -v /mnt/media/paperless/media:/extra/paperless
   chown 1000:1000 /dst/homelab-$STAMP.tar.gz && chmod 600 /dst/homelab-$STAMP.tar.gz"
 status=$?
 
+# off-site copy while apps are still stopped (consistent databases); capped so apps never stay down long
+offsite=skipped
+if grep -qE '^R2_BUCKET=.+' "$SRC/.env"; then
+  timeout 20m "$SRC/scripts/offsite.sh" backup >/dev/null 2>&1 && offsite=ok || offsite=FAILED
+fi
+
 docker start $running >/dev/null; trap - EXIT
+[ "$offsite" = ok ] && { "$SRC/scripts/offsite.sh" prune >/dev/null 2>&1 || offsite="ok (prune failed)"; }
+echo "[$(date)] off-site (R2): $offsite"
 
 ls -1t "$DST"/homelab-*.tar.gz 2>/dev/null | tail -n +$((KEEP+1)) | xargs -r rm -f
 if [ $status -eq 0 ]; then

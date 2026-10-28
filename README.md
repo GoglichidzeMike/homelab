@@ -78,7 +78,16 @@ sudo mkdir -p /mnt/media/paperless && sudo mv paperless-media /mnt/media/paperle
 docker compose up -d
 ```
 
-Backups are on the same HDD as the media — copy one elsewhere now and then.
+**Off-site:** right after the local backup (apps still stopped), `scripts/offsite.sh backup` sends an
+encrypted, incremental restic snapshot of the same data to Cloudflare R2 (bucket `homelab-backup`, free
+tier ≤10 GB). Keeps 7 daily / 4 weekly / 6 monthly. Needs `R2_*` + `RESTIC_PASSWORD` in `.env` —
+**keep a copy of `RESTIC_PASSWORD` off this machine**, without it the backup can't be opened.
+
+```bash
+scripts/offsite.sh snapshots      # list
+scripts/offsite.sh restore-test   # restore .env + compose and compare
+scripts/offsite.sh restore latest --target /restore   # full restore into $RESTORE_DIR
+```
 
 ## Torrent VPN (Mullvad)
 
