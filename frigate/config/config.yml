@@ -46,7 +46,7 @@ record:
   continuous:
     days: 0
   motion:
-    days: 14
+    days: 30
   alerts:
     retain:
       days: 30
