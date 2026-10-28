@@ -7,7 +7,7 @@ set -uo pipefail
 SRC=/home/mikegogl/homelab
 DST=/mnt/media/backups
 KEEP=14
-APPS="jellyfin homeassistant portainer qbittorrent prowlarr radarr sonarr seerr homarr audiobookshelf"
+APPS="jellyfin homeassistant portainer qbittorrent prowlarr radarr sonarr seerr homarr audiobookshelf bazarr paperless"
 STAMP=$(date +%F_%H%M)
 
 mkdir -p "$DST"
@@ -17,11 +17,12 @@ running=$(docker ps --format '{{.Names}}' | grep -xE "$(echo $APPS | tr ' ' '|')
 docker stop $running >/dev/null
 trap 'docker start $running >/dev/null' EXIT
 
-docker run --rm -v "$SRC":/src:ro -v "$DST":/dst alpine:3.20 sh -c "
+docker run --rm -v "$SRC":/src:ro -v /mnt/media/paperless/media:/extra/paperless-media:ro -v "$DST":/dst alpine:3.20 sh -c "
   tar czf /dst/homelab-$STAMP.tar.gz -C /src \
     --exclude='jellyfin/cache' --exclude='*/logs' --exclude='*/log' --exclude='*.log' \
-    --exclude='*/MediaCover' --exclude='frigate/config/model_cache' --exclude='homarr/appdata/redis' --exclude='audiobookshelf/metadata/cache' \
-    --exclude='docker-compose.yml.bak*' . &&
+    --exclude='*/MediaCover' --exclude='frigate/config/model_cache' --exclude='homarr/appdata/redis' --exclude='audiobookshelf/metadata/cache' --exclude='paperless/redis' \
+    --exclude='docker-compose.yml.bak*' . \
+    -C /extra paperless-media &&
   chown 1000:1000 /dst/homelab-$STAMP.tar.gz && chmod 600 /dst/homelab-$STAMP.tar.gz"
 status=$?
 

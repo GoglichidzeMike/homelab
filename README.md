@@ -16,6 +16,8 @@ Tailscale `homelab.tailb183e9.ts.net`). Media + recordings live on the HDD at `/
 | Dozzle | Container logs | 8888 | https://logs.saxli.app (Cloudflare Access) |
 | Audiobookshelf | Audiobooks / podcasts (iPhone: ShelfPlayer) | 13378 | https://books.saxli.app (own login) |
 | Radarr / Sonarr | Movie / TV automation | 7878 / 8989 | LAN or Tailscale only |
+| Paperless-ngx | Documents (medical etc.), OCR eng+kat+rus; iPhone: Swift Paperless | 8000 | LAN or Tailscale only — never on the tunnel |
+| Bazarr | Subtitles for Radarr/Sonarr (English; OpenSubtitles.com + Podnapisi) | 6767 | LAN or Tailscale only |
 | Prowlarr | Torrent indexers | 9696 | LAN or Tailscale only |
 | qBittorrent | Downloads | 8090 | LAN or Tailscale only |
 | Portainer | Docker UI | 9443 | LAN or Tailscale only |
@@ -28,7 +30,8 @@ Tailscale `homelab.tailb183e9.ts.net`). Media + recordings live on the HDD at `/
 
 Seerr request → Radarr/Sonarr → Prowlarr finds a torrent → qBittorrent downloads to
 `/mnt/media/downloads` → imported (hardlink) to `/mnt/media/movies` or `/mnt/media/tv` →
-Jellyfin library refresh. Torrents are removed after import (no seeding). Quality profile:
+Jellyfin library refresh. Bazarr then fetches English `.srt` subtitles
+(image subs like PGS are ignored so playback doesn't need burn-in transcoding). Torrents are removed after import (no seeding). Quality profile:
 HD-1080p, no remux, size-capped.
 
 ## How audiobooks work
@@ -37,6 +40,14 @@ Add a torrent/magnet in qBittorrent with category **audiobooks** → it download
 `/mnt/media/downloads/incomplete`, then moves to `/mnt/media/audiobooks` when finished →
 Audiobookshelf picks it up automatically. Or just copy files into `/mnt/media/audiobooks`
 (one folder per book). Podcasts are managed inside Audiobookshelf (`/mnt/media/podcasts`).
+
+## How documents work
+
+Paperless-ngx: scan/share from the iPhone (Swift Paperless, server `http://homelab.tailb183e9.ts.net:8000`,
+Tailscale on), drag-drop in the browser, or drop files into `/mnt/media/paperless/consume`. Originals +
+OCR'd PDFs live in `/mnt/media/paperless/media`. Tag `Medical` and the document types (Lab result,
+Prescription, …) auto-assign once it has learned from a few documents. First login user `mikegogl`,
+password `PAPERLESS_ADMIN_PASSWORD` in `.env` (change it in the UI).
 
 ## Remote access
 
@@ -55,7 +66,7 @@ Audiobookshelf picks it up automatically. Or just copy files into `/mnt/media/au
 ## Backups
 
 `scripts/backup.sh` runs nightly at 04:00 (user crontab) and writes
-`/mnt/media/backups/homelab-<date>.tar.gz` — all app data + `.env`, minus logs/caches. Keeps 14.
+`/mnt/media/backups/homelab-<date>.tar.gz` — all app data + `.env` + Paperless documents (as `paperless-media/`), minus logs/caches. Keeps 14.
 Apps are stopped for ~20 s during the backup. Log: `/mnt/media/backups/backup.log`.
 
 Restore (e.g. on the Raspberry Pi):
@@ -63,6 +74,7 @@ Restore (e.g. on the Raspberry Pi):
 ```bash
 git clone git@github.com:GoglichidzeMike/homelab.git && cd homelab
 sudo tar xzf /mnt/media/backups/homelab-<date>.tar.gz -C .
+sudo mkdir -p /mnt/media/paperless && sudo mv paperless-media /mnt/media/paperless/media
 docker compose up -d
 ```
 

@@ -151,6 +151,23 @@ services:
       - qbittorrent
     restart: unless-stopped
 
+  bazarr:  # subtitles for everything Radarr/Sonarr import
+    image: lscr.io/linuxserver/bazarr:latest
+    container_name: bazarr
+    ports:
+      - 6767:6767
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Asia/Tbilisi
+    volumes:
+      - ./bazarr:/config
+      - /mnt/media:/mnt/media  # same paths as Radarr/Sonarr
+    depends_on:
+      - radarr
+      - sonarr
+    restart: unless-stopped
+
   seerr:
     image: ghcr.io/seerr-team/seerr:latest
     container_name: seerr
@@ -176,6 +193,41 @@ services:
       - ./audiobookshelf/metadata:/metadata
       - /mnt/media/audiobooks:/audiobooks
       - /mnt/media/podcasts:/podcasts
+    restart: unless-stopped
+
+  paperless:  # documents (medical etc.) with OCR; LAN/Tailscale only, never on the tunnel
+    image: ghcr.io/paperless-ngx/paperless-ngx:latest
+    container_name: paperless
+    ports:
+      - 8000:8000
+    environment:
+      - USERMAP_UID=1000
+      - USERMAP_GID=1000
+      - PAPERLESS_TIME_ZONE=Asia/Tbilisi
+      - PAPERLESS_REDIS=redis://paperless-redis:6379
+      - PAPERLESS_SECRET_KEY=${PAPERLESS_SECRET_KEY}
+      - PAPERLESS_ADMIN_USER=mikegogl
+      - PAPERLESS_ADMIN_PASSWORD=${PAPERLESS_ADMIN_PASSWORD}  # only used to create the first user
+      - PAPERLESS_URL=http://homelab.tailb183e9.ts.net:8000
+      - PAPERLESS_CSRF_TRUSTED_ORIGINS=http://homelab.tailb183e9.ts.net:8000,http://192.168.0.125:8000,http://192.168.0.102:8000
+      - PAPERLESS_OCR_LANGUAGES=kat rus  # extra OCR packs, installed on start
+      - PAPERLESS_OCR_LANGUAGE=eng+kat+rus
+      - PAPERLESS_TASK_WORKERS=1  # gentle on the old CPU
+      - PAPERLESS_THREADS_PER_WORKER=2
+    volumes:
+      - ./paperless/data:/usr/src/paperless/data
+      - /mnt/media/paperless/media:/usr/src/paperless/media
+      - /mnt/media/paperless/consume:/usr/src/paperless/consume  # drop files here to import
+      - /mnt/media/paperless/export:/usr/src/paperless/export
+    depends_on:
+      - paperless-redis
+    restart: unless-stopped
+
+  paperless-redis:
+    image: redis:7
+    container_name: paperless-redis
+    volumes:
+      - ./paperless/redis:/data
     restart: unless-stopped
 
   homarr:  # dashboard, configured in the browser
