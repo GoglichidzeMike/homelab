@@ -1,0 +1,10 @@
+# Ethernet (eno1) via DHCP, preferred over Wi-Fi (lower route metric); Wi-Fi stays as backup.
+# Install: sudo install -m 600 scripts/wifi-fix/ethernet.yaml /etc/netplan/10-ethernet.yaml && sudo netplan apply
+network:
+  version: 2
+  ethernets:
+    eno1:
+      dhcp4: true
+      dhcp4-overrides:
+        route-metric: 100
+      optional: true  # don't hold up boot when the cable is unplugged

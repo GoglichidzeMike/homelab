@@ -1,6 +1,7 @@
 # homelab
 
-Docker Compose stack on the `homelab` laptop (Ubuntu, user `mikegogl`, LAN `192.168.0.102`,
+Docker Compose stack on the `homelab` laptop (Ubuntu, user `mikegogl`, LAN `192.168.0.125` Ethernet /
+`192.168.0.102` Wi-Fi backup,
 Tailscale `homelab.tailb183e9.ts.net`). Media + recordings live on the HDD at `/mnt/media`.
 
 ## Services
@@ -96,6 +97,9 @@ Stored in HA's own data (covered by backups, not tracked in git):
 - Wi-Fi (rtl8723be) drops from power saving and sometimes loses its DHCP lease.
   `sudo bash scripts/wifi-fix/install.sh && sudo reboot` installs: driver power-save off,
   keep-IP-on-missed-renewal, and a watchdog timer (reconnect → reload driver → reboot after 15 min
-  offline). Watchdog log: `journalctl -t wifi-watchdog`. Ethernet makes all of this unnecessary.
+  offline). Watchdog log: `journalctl -t wifi-watchdog`.
+- Now on Ethernet (`eno1`, 100 Mb/s): `scripts/wifi-fix/ethernet.yaml` → `/etc/netplan/10-ethernet.yaml`
+  makes it the preferred route; Wi-Fi stays up as a backup. Wi-Fi drops were what froze the cameras'
+  RTSP and stalled the VPN.
 - Bedroom camera records motion 09:00–21:00 only (see HA extras). All 4 cameras have ONVIF pan/tilt in Frigate.
 - Plan: move to a Raspberry Pi with a 4 TB NAS HDD (CMR, e.g. WD Red Plus / IronWolf).

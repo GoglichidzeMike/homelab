@@ -27,4 +27,5 @@ services:
     network_mode: service:gluetun
     ports: !reset []
     depends_on:
-      - gluetun
+      gluetun:
+        condition: service_healthy  # start only once the VPN is up
