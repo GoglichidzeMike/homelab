@@ -3,6 +3,10 @@ services:
     image: jellyfin/jellyfin
     container_name: jellyfin
     network_mode: host
+    devices:
+      - /dev/dri/renderD128:/dev/dri/renderD128  # Intel HD 620 for hardware transcoding (QSV)
+    group_add:
+      - "991"  # host render group
     volumes:
       - ./jellyfin/config:/config
       - ./jellyfin/cache:/cache

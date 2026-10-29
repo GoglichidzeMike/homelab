@@ -9,7 +9,7 @@ Tailscale `homelab.tailb183e9.ts.net`). Media + recordings live on the HDD at `/
 | Service | What | Port | Access |
 |---|---|---|---|
 | Homarr | Dashboard (home page) | 7575 | https://saxli.app (Cloudflare Access) |
-| Jellyfin | Movies / TV player | 8096 | https://jellyfin.saxli.app |
+| Jellyfin | Movies / TV player (Intel QSV hardware transcoding) | 8096 | https://jellyfin.saxli.app |
 | Seerr | Search + request movies/shows | 5055 | https://request.saxli.app (Cloudflare Access) |
 | Home Assistant | Smart home | 8123 | https://ha.saxli.app |
 | Frigate | Cameras / NVR | 8971 | https://cam.saxli.app (Frigate login) |
