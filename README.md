@@ -16,7 +16,7 @@ Tailscale `homelab.tailb183e9.ts.net`). Media + recordings live on the HDD at `/
 | Dozzle | Container logs | 8888 | https://logs.saxli.app (Cloudflare Access) |
 | Audiobookshelf | Audiobooks / podcasts (iPhone: ShelfPlayer) | 13378 | https://books.saxli.app (own login) |
 | Radarr / Sonarr | Movie / TV automation | 7878 / 8989 | LAN or Tailscale only |
-| Paperless-ngx | Documents (medical etc.), OCR eng+kat+rus; iPhone: Swift Paperless | 8000 | LAN or Tailscale only — never on the tunnel |
+| Paperless-ngx | Documents (medical etc.), OCR eng+kat+rus; iPhone: Swift Paperless | 8000 | https://docs.saxli.app (Paperless login + 2FA), LAN, Tailscale |
 | Bazarr | Subtitles for Radarr/Sonarr (English; OpenSubtitles.com + Podnapisi) | 6767 | LAN or Tailscale only |
 | Prowlarr | Torrent indexers | 9696 | LAN or Tailscale only |
 | qBittorrent | Downloads | 8090 | LAN or Tailscale only |
@@ -44,7 +44,10 @@ Audiobookshelf picks it up automatically. Or just copy files into `/mnt/media/au
 ## How documents work
 
 Paperless-ngx: scan/share from the iPhone (Swift Paperless, server `http://homelab.tailb183e9.ts.net:8000`,
-Tailscale on), drag-drop in the browser, or drop files into `/mnt/media/paperless/consume`. Originals +
+Tailscale on), drag-drop in the browser, drop files into `/mnt/media/paperless/consume`, or **email attachments to
+`docs@goglichidze.com`** (Cloudflare Email Routing → busygogl+docs@gmail.com; Paperless mail rule reads
+Gmail All Mail for To: docs@goglichidze.com every 10 min, tags `Email`, then adds Gmail label
+`paperless-imported` so each mail is imported once). Originals +
 OCR'd PDFs live in `/mnt/media/paperless/media`. Tag `Medical` and the document types (Lab result,
 Prescription, …) auto-assign once it has learned from a few documents. First login user `mikegogl`,
 password `PAPERLESS_ADMIN_PASSWORD` in `.env` (change it in the UI).

@@ -199,7 +199,7 @@ services:
       - /mnt/media/podcasts:/podcasts
     restart: unless-stopped
 
-  paperless:  # documents (medical etc.) with OCR; LAN/Tailscale only, never on the tunnel
+  paperless:  # documents (medical etc.) with OCR; LAN/Tailscale + docs.saxli.app
     image: ghcr.io/paperless-ngx/paperless-ngx:latest
     container_name: paperless
     ports:
@@ -213,7 +213,7 @@ services:
       - PAPERLESS_ADMIN_USER=mikegogl
       - PAPERLESS_ADMIN_PASSWORD=${PAPERLESS_ADMIN_PASSWORD}  # only used to create the first user
       - PAPERLESS_URL=http://homelab.tailb183e9.ts.net:8000
-      - PAPERLESS_CSRF_TRUSTED_ORIGINS=http://homelab.tailb183e9.ts.net:8000,http://192.168.0.125:8000,http://192.168.0.102:8000
+      - PAPERLESS_CSRF_TRUSTED_ORIGINS=https://docs.saxli.app,http://homelab.tailb183e9.ts.net:8000,http://192.168.0.125:8000,http://192.168.0.102:8000
       - PAPERLESS_OCR_LANGUAGES=kat rus  # extra OCR packs, installed on start
       - PAPERLESS_OCR_LANGUAGE=eng+kat+rus
       - PAPERLESS_IGNORE_DATES=${PAPERLESS_IGNORE_DATES:-}  # e.g. your birth date, so it is never taken as the document date
